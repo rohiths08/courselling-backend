@@ -1,31 +1,15 @@
 const express = require('express');
-
+const {userRouter} = require('./routes/user')
+const {coursesRouter} = require('./routes/courses')
+const {adRouter} = require('./routes/admin')
 const app = express()
 
 app.get('/', (req, res) => {
   res.send('Hello World')
 })
 
-app.post('/user/sign-in',(req,res)=>{
-    console.log(req.body)
-    res.send('sign in successful')
-})
-app.post('/user/sign-up',(req,res)=>{
-    console.log(req.body)
-    res.send('sign up successful')
-})
+app.use("/user",userRouter)
+app.use("/courses",coursesRouter)
+app.use("/admin",adRouter)
 
-app.get('/user/purchese-course',(req,res)=>{
-    console.log(req.body)
-    res.send('purchase successful')
-})
-app.post('/courses/purchese-course',(req,res)=>{
-    console.log(req.body)
-    res.send('purchase successful')
-})
-
-app.get('/courses',(req,res)=>{
-    console.log(req.body)
-    res.send('courses list')
-})
 app.listen(3000)

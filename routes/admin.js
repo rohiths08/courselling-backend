@@ -1,5 +1,6 @@
 const {Router}=require('express')
 const adRouter=Router()
+const {Admin}=require("../db")
 
 adRouter.post('/admin-signup',(req,res)=>{
     console.log(req.body)

@@ -25,7 +25,7 @@ adRouter.put('/create-course',(req,res)=>{
     console.log(req.body)
     res.send('course updated')
 })
-adRouter.get('/all-courses',(req,res)=>{
+adRouter.get('/create-course/all-courses',(req,res)=>{
     console.log(req.body)
     res.send('all courses list')
 })

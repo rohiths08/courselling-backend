@@ -3,6 +3,11 @@ const adRouter=Router()
 const {Admin}=require("../db")
 
 adRouter.post('/admin-signup',(req,res)=>{
+    const email=req.body.email
+    const password=req.body.password
+    const fname=req.body.fname
+    const laname=req.body.laname
+
     console.log(req.body)
     res.send('admin signup successful')
 })

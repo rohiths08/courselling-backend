@@ -17,5 +17,5 @@ userRouter.get('/purchase-course', (req, res) => {
 });
 
 module.exports = {
-    userRouter
+    userRouter:userRouter
 };

@@ -1,14 +1,34 @@
 const { Router } = require('express');
+const {User}=require("../db")
+const jwt = require('jsonwebtoken');
+const JWT_SECRET="chinnu"//jwt secret for user
 const userRouter = Router();
 
-userRouter.post('/sign-in', (req, res) => {
-    console.log(req.body);
-    res.json({ message: "sign in successful" });
+userRouter.post('/sign-up',async (req, res) => {
+    const {email,password,fname,lname}=req.body;
+    //adding the zod validation here will be better
+    //TODO: hash the password as plane text password is not stored in db
+   try{ await User.create({email,password,fname,lname})
+
+    res.json({ message: "sign up successful" });
+}catch(e){
+    res.send({message:"Error in signup",error:e.message})
+}
 });
 
-userRouter.post('/sign-up', (req, res) => {
-    console.log(req.body);
-    res.json({ message: "sign up successful" });
+userRouter.post('/sign-in', async (req, res) => {
+    const {email,password}=req.body;
+    //TODO: add zod validation here
+    const user= await User.findOne({email,password})
+    
+    if(user){
+        const token =jwt.sign({id:user._id},JWT_SECRET)
+        res.json({ token:token,message: "sign in successful" });
+        
+    }
+    else{
+        res.status(401).json({message:"Invalid credentials"})
+    }
 });
 
 userRouter.get('/purchase-course', (req, res) => {

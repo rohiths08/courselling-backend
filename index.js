@@ -5,7 +5,7 @@ const {adRouter} = require('./routes/admin')
 const mongoose = require("mongoose");
 const app = express()
 
-
+app.use(express.json())
 app.use("/user",userRouter)
 app.use("/courses",coursesRouter)
 app.use("/admin",adRouter)

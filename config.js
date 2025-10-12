@@ -1,5 +1,5 @@
-const JWT_userSECRET="chinnu"//jwt secret for user
-const JWT_adminSECRET="chinnu0"//different jwt secret for admin
+const JWT_userSECRET=process.env.JWT_userSECRET//jwt secret for user
+const JWT_adminSECRET=process.env.JWT_adminSECRET//different jwt secret for admin
 
 module.exports ={
     JWT_userSECRET,

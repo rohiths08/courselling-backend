@@ -3,7 +3,8 @@ const adRouter=Router()
 const {Admin, Course}=require("../db")
 const jwt = require('jsonwebtoken');
 const { JWT_adminSECRET } = require('../config');
-const {adminAuth}=require('../middleware/admin')
+const {adminAuth}=require('../middleware/admin');
+
 // const JWT
 
 adRouter.post('/admin-signup',async (req,res)=>{
@@ -34,7 +35,7 @@ adRouter.post('/admin-signin',async (req,res)=>{
 })
 
 //pipeline to upload the image
-adRouter.post('/create-course',async (req,res)=>{
+adRouter.post('/create-course',adminAuth,async (req,res)=>{
     const adminId=req.adminId;
     const {title,description,price,imageUrl,creatorid}=req.body;
     const course=await Course.create({title,description,price,imageUrl,creatorid:adminId})

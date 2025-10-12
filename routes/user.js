@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const {User}=require("../db")
 const jwt = require('jsonwebtoken');
-const JWT_SECRET="chinnu"//jwt secret for user
+const { JWT_userSECRET } = require('../config');
 const userRouter = Router();
 
 userRouter.post('/sign-up',async (req, res) => {
@@ -22,7 +22,7 @@ userRouter.post('/sign-in', async (req, res) => {
     const user= await User.findOne({email,password})
     
     if(user){
-        const token =jwt.sign({id:user._id},JWT_SECRET)
+        const token =jwt.sign({id:user._id},JWT_userSECRET)
         res.json({ token:token,message: "sign in successful" });
         
     }

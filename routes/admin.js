@@ -1,8 +1,10 @@
 const {Router}=require('express')
 const adRouter=Router()
-const {Admin}=require("../db")
+const {Admin, Course}=require("../db")
 const jwt = require('jsonwebtoken');
-const JWT_SECRET="chinnu0"//different jwt secret for admin
+const { JWT_adminSECRET } = require('../config');
+const {adminAuth}=require('../middleware/admin')
+// const JWT
 
 adRouter.post('/admin-signup',async (req,res)=>{
     const {email,password,fname,lname}=req.body;
@@ -22,7 +24,7 @@ adRouter.post('/admin-signin',async (req,res)=>{
     const admin= await Admin.findOne({email,password})
     
     if(admin){
-        const token =jwt.sign({id:admin._id},JWT_SECRET)
+        const token =jwt.sign({id:admin._id},JWT_adminSECRET)
         res.json({ token:token,message: "sign in successful" });
         
     }
@@ -31,12 +33,22 @@ adRouter.post('/admin-signin',async (req,res)=>{
     }
 })
 
-adRouter.post('/create-course',(req,res)=>{
-    console.log(req.body)
-    res.send('course created')
+//pipeline to upload the image
+adRouter.post('/create-course',async (req,res)=>{
+    const adminId=req.adminId;
+    const {title,description,price,imageUrl,creatorid}=req.body;
+    const course=await Course.create({title,description,price,imageUrl,creatorid:adminId})
+    res.json({
+        message:"Course created successfully",
+        creatorid:course._id
+    })
 })
-adRouter.put('/create-course',(req,res)=>{
-    console.log(req.body)
+
+
+adRouter.put('/create-course',async (req,res)=>{
+    const adminId=req.adminId;
+    const {courseId,title,description,price,imageUrl}=req.body;
+const course=await Course.findOneAndUpdate({_id:courseId,creatorid:adminId},{title,description,price,imageUrl})
     res.send('course updated')
 })
 adRouter.get('/create-course/all-courses',(req,res)=>{

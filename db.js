@@ -15,7 +15,7 @@ const courseSchema = new Schema({
    
   title: String,
   description: String,
-  ImageUrl: String,
+  imageUrl: String,
   price: Number,
   creatorid:ObjectId,
 });
@@ -23,7 +23,7 @@ const courseSchema = new Schema({
 const adminSchema = new Schema({
     email: {type : String,unique : true},
   fname: String,
-  laname: String,
+  lname: String,
   password: String,
 });
 const purchaseSchema = new Schema({

@@ -1,8 +1,10 @@
 const { Router } = require('express');
-const {User}=require("../db")
+const {User,Purchase, Course}=require("../db")
 const jwt = require('jsonwebtoken');
 const { JWT_userSECRET } = require('../config');
 const userRouter = Router();
+const {userAuth}=require("../middleware/user")
+
 
 userRouter.post('/sign-up',async (req, res) => {
     const {email,password,fname,lname}=req.body;
@@ -31,9 +33,17 @@ userRouter.post('/sign-in', async (req, res) => {
     }
 });
 
-userRouter.get('/purchase-course', (req, res) => {
-    console.log(req.body);
-    res.json({ message: "purchase successful" });
+userRouter.get('/purchase-course',userAuth, async (req, res) => {
+    const userId=req.userId;
+    const purchases= await Purchase.find({userId})
+    const courses=await Course.find({
+        _id:{$in:purchases.map((x=>x.courseId))}
+    })
+    res.json({
+        
+        purchases,
+        courses
+     });
 });
 
 module.exports = {

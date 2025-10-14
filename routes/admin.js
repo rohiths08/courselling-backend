@@ -4,36 +4,83 @@ const {Admin, Course}=require("../db")
 const jwt = require('jsonwebtoken');
 const { JWT_adminSECRET } = require('../config');
 const {adminAuth}=require("../middleware/admin")
+const z=require('zod');
+const bcrypt = require('bcrypt');
 
 // const JWT
+adRouter.post('/admin-signup', async (req, res) => {
+    // Destructure request body to get admin details
+    const { email, password, fname, lname } = req.body;
 
-adRouter.post('/admin-signup',async (req,res)=>{
-    const {email,password,fname,lname}=req.body;
-    //adding the zod validation here will be better
-    //TODO: hash the password as plane text password is not stored in db
-   try{ 
-    await Admin.create({email,password,fname,lname})
+    // Zod schema to validate admin input
+    const adminschema = z.object({
+        email: z.string().email(),       // must be a valid email
+        password: z.string().min(5).max(20), // password length between 5 and 20
+        fname: z.string().min(2),       // first name minimum 2 characters
+        lname: z.string().min(2)        // last name minimum 2 characters
+    });
 
-    res.json({ message: "sign up successful" });
-}catch(e){
-    res.send({message:"Error in signup",error:e.message})
-}
-})
+    // Validate the input data
+    const validation = adminschema.safeParse({ email, password, fname, lname });
+    if (!validation.success) 
+        return res.status(400).json({
+            message: "Validation error",
+            error: validation.error.format() // return formatted Zod validation errors
+        });
 
-adRouter.post('/admin-signin',async (req,res)=>{
-    const {email,password}=req.body;
-    //TODO: add zod validation here
-    const admin= await Admin.findOne({email,password})
-    
-    if(admin){
-        const token =jwt.sign({id:admin._id},JWT_adminSECRET)
-        res.json({ token:token,message: "sign in successful" });
-        
+    try { 
+        // Check if admin with same email already exists
+        const existingUser = await Admin.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: "Email already registered" });
+        }
+
+        // Hash the password before storing in database (never store plain text)
+        const hashpass = await bcrypt.hash(password, 10);
+
+        // Create new admin in the database
+        await Admin.create({
+            email,
+            password: hashpass, // store hashed password
+            fname,
+            lname
+        });
+
+        // Send success response
+        res.json({ message: "Sign up successful" });
+    } catch (e) {
+        // Handle unexpected errors
+        res.status(500).json({ message: "Error in signup", error: e.message });
     }
-    else{
-        res.status(401).json({message:"Invalid credentials"})
+});
+
+
+adRouter.post('/admin-signin', async (req, res) => {
+    const { email, password } = req.body;
+
+    const adminschema = z.object({
+        email: z.string().email(),
+        password: z.string().min(5).max(20)
+    });
+
+    const validation = adminschema.safeParse({ email, password });
+    if (!validation.success)
+        return res.status(400).json({ message: "Validation error", error: validation.error.format() });
+
+    try {
+        const admin = await Admin.findOne({ email });
+        if (!admin) return res.status(401).json({ message: "Invalid credentials" });
+
+        const isValidUser = await bcrypt.compare(password, admin.password);
+        if (!isValidUser) return res.status(401).json({ message: "Invalid credentials" });
+
+        const token = jwt.sign({ id: admin._id }, JWT_adminSECRET);
+        res.json({ token: token, message: "Sign in successful" });
+    } catch (e) {
+        res.status(401).json({ message: "Invalid credentials" });
     }
-})
+});
+
 
 //pipeline to upload the image
 adRouter.post('/create-course',adminAuth,async (req,res)=>{
